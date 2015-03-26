@@ -1,13 +1,19 @@
 {
   "name": "DropzoneManager",
-  "version": "1.0.0",
   "description": "A manager for dropzonejs",
-  "main": "index.js",
+  "author": "mjosh954@gmail.com",
+  "version": "0.0.1",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "mjosh954@gmail.com",
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mjosh954/DropzoneManager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mjosh954/DropzoneManager/issues"
+  },
+  "homepage": "https://github.com/mjosh954/DropzoneManager",
   "devDependencies": {
     "gulp": "^3.8.11",
     "gulp-concat": "^2.5.2",
@@ -16,5 +22,13 @@
     "gulp-uglify": "^1.1.0",
     "gulp-util": "^3.0.4",
     "jshint-stylish": "^1.0.1"
-  }
+  },
+  "keywords": [
+    "dropzonejs",
+    "dropzone",
+    "file",
+    "upload",
+    "manager"
+  ],
+  "license": "MIT"
 }
