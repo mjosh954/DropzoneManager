@@ -11,11 +11,16 @@ function DropzoneManager(dropzones) {
 
 }
 
-DropzoneManager.prototype.add = function(dropzone) {
+DropzoneManager.prototype.register = function(dropzone, callback) {
 	this.dropzones.push(dropzone);
+	
+	if(callback && typeof callback === 'function')
+		callback(dropzone); 
 };
 
-DropzoneManager.prototype.processAll = function(callback) {
+
+DropzoneManager.prototype.process = function(callback) {
+	
 	dropzones.forEach(function(dropzone) {
 
 	});
@@ -24,20 +29,27 @@ DropzoneManager.prototype.processAll = function(callback) {
 		callback();
 };
 
-DropzoneManager.prototype.processNth = function(index, callback) {
-	
+DropzoneManager.prototype.processById = function(id, callback) {
+	var dropzone;
+
 	if(callback && typeof callback === 'function')
-		callback();
+		callback(null, dropzone);
 };
 
-DropzoneManager.prototype.removeNth = function(index, callback) {
+
+DropzoneManager.prototype.removeById = function(id, callback) {
+	var dropzone;
+	if(this.dropzones.length === 0)
+		callback(new Error('No dropzones registered'), null);
 
 	if(callback && typeof callback === 'function')
-		callback();
+		callback(null, dropzone);
 };
 
 DropzoneManager.prototype.clear = function(callback) {
-	
+
 	if(callback && typeof callback === 'function')
 		callback();
 };
+
+

@@ -11,15 +11,17 @@ gulp.task('jshint', function() {
 	.pipe(jshint.reporter('jshint-stylish'));
 });
 
+// minify DropzoneManager and add sourcemaps
 gulp.task('javascript', function() {
 	return gulp.src('app/*.js')
 	.pipe(sourcemaps.init())
-	.pipe(concat('DropzoneManager.min.js'))
+	.pipe(concat('dropzone-manager.min.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
 
+// run jshint and then minify
 gulp.task('watch', function() {
 	gulp.watch('app/*.js', ['jshint', 'javascript']);
 });
