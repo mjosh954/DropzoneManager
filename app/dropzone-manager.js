@@ -9,7 +9,6 @@
 		var dropzoneContainer;
 
 		if(dropzones)
-			dropzoneContainer = dropzones;
 		else
 			dropzoneContainer = [];
 		
