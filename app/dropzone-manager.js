@@ -1,34 +1,41 @@
 
-;var DropzoneManager = (function() {
+var DropzoneManager = (function() {
 	'use strict';
 
 	function DropzoneManager(dropzones) {
 		if(!(this instanceof DropzoneManager))
 			return new DropzoneManager(dropzones);
 		
-		var dropzoneContainer;
+		this.self = this;
+		this.dropzones = {}; // convert this to Dictionary[id] = dropzone
 
-		if(dropzones)
-		else
-			dropzoneContainer = [];
-		
-		// only expose this public method
-		this.getRegisteredDropzones = function() {
-			return dropzoneContainer;
-		};
+		if(dropzones) {
+			dropzones.forEach(function(dropzone) {
+				this.self.register(dropzone);
+			});
+		}
 	}
 
+	
 	/**
 	*
 	* Adds a dropzone to the manager
 	*
 	**/
 	DropzoneManager.prototype.register = function(dropzone, callback) {
-		this.getRegisteredDropzones().push(dropzone);
+
+		initDropzone(dropzone); // initialize the new dropzone, then add
+
+		this.dropzones[dropzone.options.id] = dropzone; // add to dictionary
 		
 		if(callback && typeof callback === 'function')
-			callback(dropzone); // return newly registered dropzone
+			return callback(dropzone); // return newly registered dropzone
 	};
+
+
+	function initDropzone(dropzone) {
+		// TODO: add additional properties
+	}
 
 
 	/**
@@ -36,18 +43,20 @@
 	* Processes all registered dropzones with queued files for upload. 
 	*
 	**/
-	DropzoneManager.prototype.process = function(callback) {
+	DropzoneManager.prototype.processAll = function(callback) {
 		
 		if(!this.hasRegisteredDropzones())
 			return callback(new Error("Manager has no dropzones registered"));
 
-		this.getRegisteredDropzones().forEach(function(dropzone) {
-			dropzone.processQueue();
+		var ids = Object.keys(this.dropzones);
+		ids.forEach(function(id) {
+			this.processById(id);
 		});
 
 		if(callback && typeof callback === 'function')
-			callback();
+			return callback();
 	};
+
 
 	/**
 	*
@@ -55,13 +64,21 @@
 	*
 	**/
 	DropzoneManager.prototype.processById = function(id, callback) {
-		var dropzone;
 
 		if(!this.hasRegisteredDropzones())
 			return callback(new Error("Manager has no dropzones registered"));
 
+		if(!isRegistered(this.dropzones, id))
+			return callback(new Error('"' + id + '" is not a registered Dropzone'));
+
+		// TODO finish
+		var processedDropzone = this.dropzones[id];
+		processedDropzone.processQueue();
+
 		if(callback && typeof callback === 'function')
-			callback(null, dropzone);
+			return callback(null, processedDropzone);
+
+		return processedDropzone;
 	};
 
 
@@ -71,49 +88,65 @@
 	*
 	**/
 	DropzoneManager.prototype.removeById = function(id, callback) {
-		var dropzone;
-
+		
 		if(!this.hasRegisteredDropzones())
-			callback(new Error('Manager has no dropzones registered'), null);
+			return callback(new Error('Manager has no dropzones registered'), null);
 
+		// TODO finish
+		// Check if id is registered 
+		if(isRegistered(this.dropzones, id))
+			return callback(new Error('"' + id + '" is not a registered Dropzone'));
 
+		var removedDropzone = this.dropzones[id];
+		delete this.dropzones[id];
 
 		if(callback && typeof callback === 'function')
-			callback(null, dropzone);
+			return callback(null, removedDropzone);
+
+		return removedDropzone;
 	};
 
 
 	/**
-	* Clears out the manager of all dropzones registered
+	* 
+	* Clears out the manager of all dropzones registered with callback returning the dropzones
 	* O(1)
 	* 
 	**/
 	DropzoneManager.prototype.unregisterAll = function(callback) {
-		this.getRegisteredDropzones().length = 0;
+		var unregisteredDropzones = JSON.parse(JSON.stringify(this.dropzones)); // create an unreferenced copy
+		
+		this.dropzones = {}; // reset to empty object dictionary
 
 		if(callback && typeof callback === 'function')
-			callback();
+			callback(unregisteredDropzones); // return all dropzones that got removed
 	};
+
 
 	/**
 	*
 	* Checks if any dropzone in the manager has pending files for upload
 	* O(n)
+	* 
 	**/
 	DropzoneManager.prototype.hasAnyQueuedFiles = function() {
 		var hasQueued = false;
-		this.getRegisteredDropzones().forEach(function(dropzone) {
-			dropzone.files.forEach(function(file) {
-	            if (file.status === "queued") {
-	                hasQueued = true;
-	                return;
-	            }
-	        });
-	        if(hasQueued) return;
-	    });
+		var ids = Object.keys(this.dropzones); // get all the keys
+
+		ids.forEach(function(id) {
+			this.dropzones[id].files.forEach(
+				function(file) {
+					if (file.status === "queued") {
+		                hasQueued = true;
+		                return;
+	            	}            		
+				});
+			if(hasQueued) return;
+		});
 
 	    return hasQueued;
 	};
+
 
 	/**
 	*
@@ -121,8 +154,9 @@
 	*
 	**/
 	DropzoneManager.prototype.hasRegisteredDropzones = function() {
-		return this.getRegisteredDropzones().length > 0;
+		return Object.keys(this.dropzones).length > 0;
 	};
+
 
 	/**
 	*
@@ -131,11 +165,19 @@
 	**/
 	DropzoneManager.createDropzone = function(id, options) {
 		// TODO Proxy to add additional properties and validation
-		var newDropzone = new Dropzone('div#' + id, options);
+		var newDropzone = new Dropzone(id, options);
 
 		return newDropzone;
 	};
 
 
+	function isRegistered(dropzones, id) {
+		return dropzones[id] === "undefined";
+	}
+
+
+
+
 	return DropzoneManager;
+
 })();
