@@ -28,3 +28,9 @@ manager.processAll(function(dropzones) {
 	alert('finished');
 });
 ```
+or process a specific dropzone in the manager via id
+```javascript
+manager.processById('myDropzoneId', function(err, dropzone) {
+	if(!err) alert('Dropzone: ' + dropzone.options.id + 'has been processed');
+})
+```

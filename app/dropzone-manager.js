@@ -31,7 +31,7 @@ var DropzoneManager = (function() {
 		this.dropzones[dropzone.options.id] = dropzone; // add to dictionary
 		
 		if(callback && typeof callback === 'function')
-			return callback(dropzone); // return newly registered and initialized dropzone
+			return callback(null, dropzone); // return newly registered and initialized dropzone
 	};
 
 
@@ -51,14 +51,20 @@ var DropzoneManager = (function() {
 			return callback(new Error("Manager has no dropzones registered"));
 
 		var ids = Object.keys(this.dropzones);
+		var dropzones = [];
 		ids.forEach(function(id) {
 			// check if the dropzone is registered with id
 			if(isRegistered(id)) 
-				this.processById(id);
+				this.processById(id, function(err, dropzone) {
+					if(!err) dropzones.push(dropzone);
+				});
 		});
 
+		// get collection of dropzones that were processed
+		// pass in callback
+
 		if(callback && typeof callback === 'function')
-			return callback();
+			return callback(null, dropzones);
 	};
 
 
