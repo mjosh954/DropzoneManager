@@ -114,12 +114,17 @@ var DropzoneManager = (function() {
 	* 
 	**/
 	DropzoneManager.prototype.unregisterAll = function(callback) {
+		if(!this.hasRegisteredDropzones()) 
+			return callback(new Error('Manager has no dropzones registered.'));
+
 		var unregisteredDropzones = JSON.parse(JSON.stringify(this.dropzones)); // create an unreferenced copy
-		
+	
 		this.dropzones = {}; // reset to empty object dictionary
 
 		if(callback && typeof callback === 'function')
-			callback(unregisteredDropzones); // return all dropzones that got removed
+			return callback(null, unregisteredDropzones); // return all dropzones that got removed
+	
+		return unregisteredDropzones;
 	};
 
 
@@ -131,21 +136,29 @@ var DropzoneManager = (function() {
 	**/
 	DropzoneManager.prototype.hasAnyQueuedFiles = function() {
 		var hasQueued = false;
-		var ids = Object.keys(this.dropzones); // get all the keys
 
-		ids.forEach(function(id) {
-			this.dropzones[id].files.forEach(
-				function(file) {
-					if (file.status === "queued") {
-		                hasQueued = true;
-		                return;
-	            	}            		
-				});
-			if(hasQueued) return;
-		});
+		// Check if there's any registered dropzones first. Return false if none.
+		if(this.hasRegisteredDropzones()) {
+			var ids = Object.keys(this.dropzones); // get all the keys
+
+			ids.forEach(function(id) {
+				if(isRegistered(id)) {
+					this.dropzones[id].files.forEach(
+						function(file) {
+							if (file.status === "queued") {
+				                hasQueued = true;
+				                return;
+			            	}            		
+						});
+				}
+
+				if(hasQueued) return;
+			});
+		}
 
 	    return hasQueued;
 	};
+
 
 
 	/**
@@ -170,13 +183,14 @@ var DropzoneManager = (function() {
 		return newDropzone;
 	};
 
-
+	/**
+	*
+	* Check if dropzone is registered with that id.
+	*
+	**/
 	function isRegistered(dropzones, id) {
 		return dropzones[id] === "undefined";
 	}
-
-
-
 
 	return DropzoneManager;
 
