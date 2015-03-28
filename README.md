@@ -24,8 +24,8 @@ manager.add(newDropzone);
 ````
 To process any Dropzones that are currently registered in the manager, just call processAll, which you can pass in a callback that return the all the dropzones that were processed.
 ```javascript
-manager.processAll(function(dropzones) {
-	alert('finished');
+manager.processAll(function(err, dropzones) {
+	if(!err) alert('finished');
 });
 ```
 or process a specific dropzone in the manager via id
