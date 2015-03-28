@@ -18,9 +18,13 @@ var manager = new DropzoneManager();
 ```
 Add a dropzone
 ```javascript
-manager.add(new Dropzone("div#myId", { url: "/url/to/post"}));
+var newDropzone = DropzoneManager.createDropzone('myDropzoneId', { url: "/url/to/post"}));
+
+manager.add(newDropzone);
 ````
 To process any Dropzones that are currently registered in the manager, just call processAll, which you can pass in a callback that return the all the dropzones that were processed.
-```
-manager.processAll( [,callback]);
+```javascript
+manager.processAll(function(dropzones) {
+	alert('finished');
+});
 ```
