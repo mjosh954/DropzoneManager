@@ -10,7 +10,7 @@ var DropzoneManager = (function() {
 		this.self = this;
 		this.dropzones = {}; // convert this to Dictionary[id] = dropzone
 
-		if(dropzones) {
+		if(dropzones && dropzones.length > 0) {
 			dropzones.forEach(function(dropzone) {
 				this.self.register(dropzone);
 			});
