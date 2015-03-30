@@ -22,10 +22,15 @@ var DropzoneManager = (function() {
 	* Adds a dropzone to the manager
 	*
 	**/
-	DropzoneManager.prototype.register = function(dropzone, callback) {
+	DropzoneManager.prototype.register = function(dropzone, options, callback) {
 		if(!isDropzoneInstance(dropzone))
 			return callback(new Error('Not a valid dropzone to register'));
 		
+		if(!callback && typeof options === 'function'){
+			callback = options;
+			options = {};
+		}
+
 		initDropzone(dropzone); // initialize the new dropzone, then add
 
 		this.dropzones[dropzone.options.id] = dropzone; // add to dictionary
@@ -45,8 +50,13 @@ var DropzoneManager = (function() {
 	* Processes all registered dropzones with queued files for upload. 
 	*
 	**/
-	DropzoneManager.prototype.processAll = function(callback) {
-		
+	DropzoneManager.prototype.processAll = function(options, callback) {
+		if(!callback && typeof options === 'function') {
+			callback = options;
+			options = {};
+			options.order = 'ASC';
+		}
+
 		if(!this.hasRegisteredDropzones())
 			return callback(new Error("Manager has no dropzones registered"));
 
