@@ -2,16 +2,20 @@
 var DropzoneManager = (function() {
 	'use strict';
 
-	function DropzoneManager(dropzones) {
+	function DropzoneManager(dropzones, options) {
 		if(!(this instanceof DropzoneManager))
 			return new DropzoneManager(dropzones);
 		
+		if(!options){
+			options = {};
+		}
+
 		this.self = this;
 		this.dropzones = {}; // convert this to Dictionary[id] = dropzone
 
 		if(dropzones) {
 			dropzones.forEach(function(dropzone) {
-				this.self.register(dropzone);
+				this.self.register(dropzone, options);
 			});
 		}
 	}
@@ -23,13 +27,15 @@ var DropzoneManager = (function() {
 	*
 	**/
 	DropzoneManager.prototype.register = function(dropzone, options, callback) {
-		if(!isDropzoneInstance(dropzone))
-			return callback(new Error('Not a valid dropzone to register'));
 		
 		if(!callback && typeof options === 'function'){
 			callback = options;
 			options = {};
 		}
+
+		if(!isDropzoneInstance(dropzone))
+			return callback(new Error('Not a valid dropzone to register'));
+		
 
 		initDropzone(dropzone); // initialize the new dropzone, then add
 
@@ -40,8 +46,15 @@ var DropzoneManager = (function() {
 	};
 
 
+	/**
+	*
+	* Add isRegistered property on dropzone object, 
+	*
+	**/
 	function initDropzone(dropzone) {
 		// TODO: add additional properties
+		// 
+		dropzone.isRegistered = true; // add registered property on dropzone instance.
 	}
 
 
@@ -50,7 +63,7 @@ var DropzoneManager = (function() {
 	* Processes all registered dropzones with queued files for upload. 
 	*
 	**/
-	DropzoneManager.prototype.processAll = function(options, callback) {
+	DropzoneManager.prototype.processAll = function(options, callback) { // TODO add option to unregister post process
 		if(!callback && typeof options === 'function') {
 			callback = options;
 			options = {};
@@ -83,7 +96,10 @@ var DropzoneManager = (function() {
 	* Processes the queue of a specific registered dropzone with id
 	*
 	**/
-	DropzoneManager.prototype.processById = function(id, callback) {
+	DropzoneManager.prototype.processById = function(id, callback) { // TODO add option, ex. unregister after process
+		if(!callback || typeof callback !== 'function') {
+			callback = function(err, dropzone) { }
+		}
 
 		if(!this.hasRegisteredDropzones())
 			return callback(new Error("Manager has no dropzones registered"));
@@ -107,8 +123,11 @@ var DropzoneManager = (function() {
 	* Clears out the manager of registered dropzone with specified id
 	*
 	**/
-	DropzoneManager.prototype.removeById = function(id, callback) {
-		
+	DropzoneManager.prototype.removeById = function(id, options, callback) { // TODO add retainDZ instance option
+		if(!callback || typeof callback !== 'function') {
+			callback = function(err, dropzone) { }
+		}
+
 		if(!this.hasRegisteredDropzones())
 			return callback(new Error('Manager has no dropzones registered'), null);
 
@@ -133,13 +152,31 @@ var DropzoneManager = (function() {
 	* O(1)
 	* 
 	**/
-	DropzoneManager.prototype.unregisterAll = function(callback) {
+	DropzoneManager.prototype.unregisterAll = function(options, callback) {
+		if(!callback && typeof options === 'function'){
+			callback = options;
+			options = {};
+		}
+
 		if(!this.hasRegisteredDropzones()) 
 			return callback(new Error('Manager has no dropzones registered.'));
 
 		var unregisteredDropzones = JSON.parse(JSON.stringify(this.dropzones)); // create an unreferenced copy
-	
-		this.dropzones = {}; // reset to empty object dictionary
+		
+		if(!options.retainDropzones){ // remove all trace of dropzones
+			this.dropzones = {}; // reset to empty object dictionary
+		}
+		else {
+			var ids = Object.keys(this.dropzones);
+			var dropzones = [];
+			ids.forEach(function(id) {
+			// check if the dropzone is registered with id
+			if(isRegistered(id)) {
+				var dropzone = this.dropzones[id].isRegistered = false;
+			}
+		});
+		}
+
 
 		if(callback && typeof callback === 'function')
 			return callback(null, unregisteredDropzones); // return all dropzones that got removed
