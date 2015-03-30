@@ -14,7 +14,8 @@ Add the required script tags linking to your copy of the dropzone.js and dropzon
 ```
 Create a new instance. 
 ```javascript
-var manager = new DropzoneManager();
+var existingDropzones = Dropzone.instance || [];
+var manager = new DropzoneManager(existingDropzones);
 ```
 Add a dropzone
 ```javascript
@@ -24,13 +25,13 @@ manager.add(newDropzone);
 ````
 To process any Dropzones that are currently registered in the manager, just call processAll, which you can pass in a callback that return the all the dropzones that were processed.
 ```javascript
-manager.processAll(function(err, dropzones) {
+manager.processAll( { order : 'ASC' }, function(err, dropzones)) {
 	if(!err) alert('finished');
 });
 ```
 or process a specific dropzone in the manager via id
 ```javascript
-manager.processById('myDropzoneId', function(err, dropzone) {
+manager.processById({ id: 'myDropzoneId' }, function(err, dropzone) {
 	if(!err) alert('Dropzone: ' + dropzone.options.id + 'has been processed');
 })
 ```
