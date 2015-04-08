@@ -6,7 +6,7 @@ var DropzoneManager = (function() {
 		if(!(this instanceof DropzoneManager))
 			return new DropzoneManager(dropzones);
 		
-		this.self = this;
+		var self = this;
 		this.dropzones = {};
 
 		if(dropzones && dropzones.length > 0) {
@@ -23,13 +23,11 @@ var DropzoneManager = (function() {
 	*
 	**/
 	DropzoneManager.prototype.register = function(dropzone, callback) {
-		
-		if(!callback || callback !== 'function'){
-			callback = function(err, dropzone) {};
-		}
 
 		if(!isDropzoneInstance(dropzone))
+		{
 			return callback(new Error('Not a valid dropzone to register'));
+		}
 		
 		initDropzone(dropzone); // initialize the new dropzone, then add
 
@@ -47,6 +45,8 @@ var DropzoneManager = (function() {
 	function initDropzone(dropzone) {
 		// NOTE: add additional 'default' properties
 		// on the dropzone object
+		if(!dropzone && !(typeof dropzone !== 'Dropzone'))
+			throw new Error("Can't init Dropzone unless it's a type Dropzone");
 		dropzone.isRegistered = true; 
 	}
 
@@ -260,6 +260,7 @@ var DropzoneManager = (function() {
 	};
 
 	function isDropzoneInstance(dropzone) {
+		if(!dropzone) return false;
 		return (dropzone instanceof Dropzone);
 	}
 
@@ -269,6 +270,9 @@ var DropzoneManager = (function() {
 	*
 	**/
 	function isRegistered(dropzones, id) {
+		if(!dropzones) throw new Error('Missing dropzones parameter.');
+		if(!id) throw new Error('Missing id parameter');
+
 		return dropzones[id] !== "undefined" && isDropzoneInstance(dropzones[id]) && dropzones[id].isRegistered;
 	}
 
