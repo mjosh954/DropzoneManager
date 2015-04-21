@@ -102,9 +102,7 @@ var DropzoneManager = (function() {
 	*
 	**/
 	DropzoneManager.prototype.processById = function(params, callback) { // TODO add option, ex. unregister after process
-		if(!callback || typeof callback !== 'function') {
-			callback = function(err, dropzone) { };
-		}
+
 
 		if(!this.hasRegisteredDropzones())
 			return callback(new Error("Manager has no dropzones registered"));
@@ -114,11 +112,14 @@ var DropzoneManager = (function() {
 
 		var processedDropzone = this.dropzones[params.id];
 		processedDropzone.processQueue();
+		
 		if(params.postUnregister){
 			this.dropzones[params.id].isRegistered = false; // unregister if param post unregister is true
 		}
 
-		return callback(null, processedDropzone); // return processed dropzone
+		if(!callback || typeof callback !== 'function') {
+			return callback(null, processedDropzone); // return processed dropzone
+		}
 	};
 
 
